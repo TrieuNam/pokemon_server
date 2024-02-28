@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<!-- bootstrap table -->
+	<link rel="stylesheet" href={{ static_url("node_modules/bootstrap-table/dist/bootstrap-table.min.css") }} />
+	<script src={{ static_url("node_modules/bootstrap-table/dist/bootstrap-table.min.js") }}></script>
+	{% if user.language == "en_US" %}
+		<script src={{ static_url("node_modules/bootstrap-table/dist/locale/bootstrap-table-en-US.js") }}></script>
+	{% elif user.language == "vi_VN" %}
+		<script src={{ static_url("node_modules/bootstrap-table/dist/locale/bootstrap-table-vi-VN.min.js") }}></script>
+	{% else %}
+		<script src={{ static_url("node_modules/bootstrap-table/dist/locale/bootstrap-table-zh-CN.min.js") }}></script>
+	{% end %}
+	<link rel="stylesheet" href={{ static_url("css/dashboard.css") }} />
+	{% block css %}
+	{% end %}
+{% end %}
+
+{% block body %}
+    <div class="sidebar">
+    	<div class="sidebar-header">
+    		<a href="/"><span class="glyphicon glyphicon-home"></span> <strong>GM-WEBSITE</strong></a>
+    	</div>
+    	<div class="sidebar-body">
+    		<div class="sidebar-menu">
+				<ul class="nav">
+					<li><a data-toggle="collapse" href="#qn89">
+						<div class="z">{{ _(u"基础查询") }}</div><span class="glyphicon glyphicon-chevron-up right"></span>
+					</a></li>
+				</ul>
+			</div>
+			<div id="qn89" class="collapse sidebar-content">
+				<ul class="nav">
+					<li><a href="/daily"><div class="zz">{{ _(u"基础数据查询") }}</div></a></li>
+					<li><a href="/retention"><div class="zz">{{ _(u"留存查询") }}</div></a></li>
+					<li><a href="/recharge"><div class="zz">{{ _(u"充值查询") }}</div></a></li>
+				</ul>
+			</div>
+			<div class="sidebar-menu">
+				<ul class="nav">
+					<li><a data-toggle="collapse" href="#qn69">
+						<div class="z">{{ _(u"运营数据") }}</div><span class="glyphicon glyphicon-chevron-up right"></span>
+					</a></li>
+				</ul>
+			</div>
+			<div id="qn69" class="collapse sidebar-content">
+				<ul class="nav">
+					<li><a href="/online_player"><div class="zz">{{ _(u"游戏数据") }}</div></a></li>
+					<li><a href="/logitem_archive"><div class="zz">{{ _(u"数据监控") }}</div></a></li>
+					<li><a href="/area_data"><div class="zz">{{ _(u"区服数据") }}</div></a></li>
+				</ul>
+			</div>
+			<div class="sidebar-menu">
+				<ul class="nav">
+					<li><a data-toggle="collapse" href="#qn1">
+						<div class="z">{{ _(u"GM管理") }}</div><span class="glyphicon glyphicon-chevron-up right"></span>
+					</a></li>
+				</ul>
+			</div>
+			<div id="qn1" class="collapse sidebar-content">
+				<ul class="nav">
+					<li><a href="/sendmail"><div class="zz">{{ _(u"发送邮件") }}</div></a></li>
+					<li><a href="/role_activity"><div class="zz">{{ _(u"玩家活动") }}</div></a></li>
+					<li><a href="/operate_activity"><div class="zz">{{ _(u"运营活动") }}</div></a></li>
+					<li><a href="/gift_packs"><div class="zz">{{ _(u"礼包生成") }}</div></a></li>
+					<li><a href="/chat_monitor"><div class="zz">{{ _(u"聊天监控") }}</div></a></li>
+					<!-- <li><a href="#"><div class="zz">{{ _(u"日志查看") }}</div></a></li> -->
+					<li><a href="/account_migrate"><div class="zz">{{ _(u"账号迁移") }}</div></a></li>
+					<li><a href="/refreshcsv"><div class="zz">{{ _(u"GM工具") }}</div></a></li>
+					<!-- <li><a href="/blacklist"><div class="zz">{{ _(u"黑名单") }}</div></a></li> -->
+				</ul>
+			</div>
+			{% if debug %}
+				<div class="sidebar-menu">
+					<ul class="nav">
+						<li><a data-toggle="collapse" href="#qn2">
+							<div class="z">{{ _(u"内网测试") }}</div><span class="glyphicon glyphicon-chevron-up right"></span>
+						</a></li>
+					</ul>
+				</div>
+				<div id="qn2" class="collapse sidebar-content">
+					<ul class="nav">
+						<li><a href="/test_server"><div class="zz">{{ _(u"服务器配置") }}</div></a></li>
+						<li><a href="/test_yyhuodong"><div class="zz">{{ _(u"运营活动配置") }}</div></a></li>
+						<!-- <li><a href="/test_fight"><div class="zz">{{ _(u"战斗测试") }}</div></a></li> -->
+					</ul>
+				</div>
+			{% end %}
+    	</div>
+	</div>
+	<div class="topbar">
+		<div><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> {{ _(u"退出") }}</a></div>
+		<div>
+			<div class="dropdown">
+				<a href="#" id="dLabel" data-toggle="dropdown">
+					<span class="glyphicon glyphicon-globe"></span> {{ _(u"语言") }}<span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+			    	<li><a href="/lanauge_set?lang=cn">简体中文</a></li>
+			    	<li><a href="/lanauge_set?lang=en">English</a></li>
+				</ul>
+			</div>
+		</div>
+		{% if user.permission >= 999 %}
+			<div><a href="#" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-plus"></span> {{ _(u"添加成员") }}</a></div>
+		{% end %}
+		<div><span class="glyphicon glyphicon-user"></span> {{ _(u"你好") }}, {{ user.name }}</div>
+	</div>
+
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	                <h4 class="modal-title" id="myModalLabel"><span class="glyphicon glyphicon-pushpin"></span> {{ _(u"添加成员信息") }}</h4>
+	            </div>
+	            <div class="modal-body">
+	            	<div id="create-account-info">
+						<div>
+							<form class="form-inline">
+								<div class="form-group">
+									<label><span class="glyphicon glyphicon-asterisk"></span> {{ _(u"权限等级") }}</label>
+									<select id="power-level" class="form-control">
+										<option>1</option>
+						        		<option>100</option>
+						        		<option>500</option>
+						        		<option>999</option>
+									</select>
+								</div>
+							</form>
+						</div>
+						<div>
+							<form class="form-inline">
+								<div class="form-group">
+									<label><span class="glyphicon glyphicon-user"></span> {{ _(u"用户名") }}</label>
+									<input id="account-name" class="form-control"/>
+									<div id="account-name-ok" class="form-control check-op check-ok hidden"><span class="glyphicon glyphicon-ok"></span></div>
+									<div id="account-name-remove" class="form-control check-op check-err hidden">{{ _(u"该用户已存在") }}</div>
+								</div>
+							</form>
+						</div>
+						<div>
+							<form class="form-inline">
+								<div class="form-group">
+									<label><span class="glyphicon glyphicon-eye-close"></span> {{ _(u"密码") }}</label>
+									<input id="account-pwd" type="password" class="form-control"/>
+								</div>
+							</form>
+						</div>
+						<div>
+							<form class="form-inline">
+								<div class="form-group">
+									<label><span class="glyphicon glyphicon-eye-close"></span> {{ _(u"确认密码") }}</label>
+									<input id="confirm-pwd" type="password" class="form-control"/>
+									<div id="confirm-pwd-ok" class="form-control check-op check-ok hidden"><span class="glyphicon glyphicon-ok"></span></div>
+									<div id="confirm-pwd-remove" class="form-control check-op check-err hidden"><span class="glyphicon glyphicon-remove"></span></div>
+								</div>
+							</form>
+						</div>
+						<div>
+							<span id="create-account-err" class="check-err"></span>
+						</div>
+					</div>
+	            </div>
+	            <div class="modal-footer">
+	                <button type="button" class="btn btn-default" data-dismiss="modal">{{ _(u"关闭") }}</button>
+	                <button id="create-account" type="button" class="btn btn-primary">{{ _(u"提交") }}</button>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+
+	<!-- servers select -->
+	<div class="modal fade" id="serv-select-modal" tabindex="-1" role="dialog">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	                <h4 class="modal-title">{{ _(u"选择服务器") }}</h4>
+	            </div>
+	            <div class="modal-body">
+	            	{% for serv in servs %}
+	            		<div class='modal-btn-select'>
+							<button id="{{ serv }}" class="btn btn-success btn-sm" onclick="servBtnClick(this)">{{ serv }}</button>
+						</div>
+					{% end %}
+	            </div>
+	            <div class="modal-footer">
+	            </div>
+	        </div>
+	    </div>
+	</div>
+
+	<!-- channels select -->
+	<div class="modal fade" id="channel-select-modal" tabindex="-1" role="dialog">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	                <h4 class="modal-title">{{ _(u"选择渠道") }}</h4>
+	            </div>
+	            <div class="modal-body">
+	            	{% for channel in channels %}
+	            		<div class='modal-btn-select'>
+		            		{% if channel[1] == 1 %}
+								<button id="{{ channel[0] }}" class="btn btn-primary btn-sm" onclick="channelBtnClick(this)">{{ channel[0] }}</button>
+							{% else %}
+								<button id="{{ channel[0] }}" class="btn btn-success btn-sm" onclick="channelBtnClick(this)">{{ channel[0] }}</button>
+							{% end %}
+						</div>
+					{% end %}
+	            </div>
+	            <div class="modal-footer">
+	            </div>
+	        </div>
+	    </div>
+	</div>
+
+	<!-- loading -->
+	<div class="modal fade" id="ajax-loading" tabindex="-1" role="dialog">
+	    <div class="modal-dialog">
+	    	<div class='modal-loading'><span><strong>Loading...</strong></span></div>
+	    </div>
+	</div>
+
+	{% block main %}
+		<div class="container-fluid main">
+	        <div class="row" style="text-align: center; padding-top: 18px;">
+	        	<div class="col-lg-3">
+	        		<div class="panel panel-primary">
+					    <div class="panel-heading">
+					        {{ _(u"累计激活") }}
+					    </div>
+					    <div class="panel-body">
+					        {{ overview[0] }} {{ _(u"设备") }}
+					    </div>
+					</div>
+	        	</div>
+	        	<div class="col-lg-3">
+	        		<div class="panel panel-primary">
+					    <div class="panel-heading">
+					        {{ _(u"累计注册账户") }}
+					    </div>
+					    <div class="panel-body">
+					        {{ overview[1] }} {{ _(u"账户") }}
+					    </div>
+					</div>
+	        	</div>
+	        	<div class="col-lg-3">
+	        		<div class="panel panel-primary">
+					    <div class="panel-heading">
+					        {{ _(u"累计付费账户") }}
+					    </div>
+					    <div class="panel-body">
+					        {{ overview[2] }} {{ _(u"账户") }}
+					    </div>
+					</div>
+	        	</div>
+	        	<div class="col-lg-3">
+	        		<div class="panel panel-primary">
+					    <div class="panel-heading">
+					        {{ _(u"累计收入") }}
+					    </div>
+					    <div class="panel-body">
+					        {{ overview[3] }}
+					    </div>
+					</div>
+	        	</div>
+	        </div>
+		</div>
+	{% end %}
+	<div id='copyright'>Copyright © 2014 YouMi Information Technology Inc.</div>
+{% end %}
+
+{% block foot %}
+	<script src={{ static_url("js/dashboard.js") }}></script>
+	{% block js %}
+	{% end %}
+{% end %}

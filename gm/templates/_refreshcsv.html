@@ -1,0 +1,542 @@
+{% extends "dashboard.html" %}
+
+{% block css %}
+	<style>
+		.pull-left.pagination-detail {
+			display:none;
+		}
+	</style>
+{% end %}
+
+{% block main %}
+	<div class="container-fluid main">
+		<div class="row">
+			<div class="title"><h4>{{ _(u"GM工具")}}</h4></div>
+		</div>
+
+        <div class="well">
+        	<div class="row">
+        		<div class="col-lg-12">
+        			<form class="form-inline" role="form">
+						<div class="form-group">
+						  	<label>{{ _(u'服务器') }}</label>
+						    <input id="serv-select" class="form-control input-sm" data-toggle="modal" data-target="#serv-select-modal" placeholder="默认为所有server">
+						</div>
+					</form>
+        		</div>
+        	</div>
+
+        	<div class="row margin-top-m">
+				<div class="col-lg-12">
+	        		<ul class="nav nav-tabs">
+					    <li class="active"><a href="#refreshcsv" data-toggle="tab">{{ _(u"刷新配表") }}</a></li>
+						<li><a href="#execpy" data-toggle="tab">{{ _(u"执行脚本") }}</a></li>
+						<li><a href="#genrobots" data-toggle="tab">{{ _(u"生成机器人") }}</a></li>
+						<li><a href="#cardattrs" data-toggle="tab">{{ _(u"计算卡牌属性") }}</a></li>
+						<li><a href="#dataexport" data-toggle="tab">{{ _(u"导出数据") }}</a></li>
+						<li><a href="#dataimport" data-toggle="tab">{{ _(u"导入数据") }}</a></li>
+					</ul>
+	        	</div>
+			</div>
+
+			<div class="row">
+	        	<div class="col-lg-12">
+	        		<div id="tabContent" class="tab-content">
+						<div class="tab-pane fade in active" id="refreshcsv">
+							<div class="margin-top-s">
+								<p><i>请选好区服，点击确认按钮进行<span class='note-red'>配表刷新</span>。</i></p>
+								<input id="refreshcsv-click" type="button" class="btn btn-default btn-success input-sm" value="刷新配表"><br>
+								<pre id='show-ret' class="hidden margin-top-s"></pre>
+							</div>
+						</div>
+
+						<div class="tab-pane fade" id="execpy">
+							<div class="margin-top-s">
+								<p><i>请上传脚本文件，并选好区服，点击确认按钮进行<span class='note-red'>脚本执行</span>。</i></p>
+								<input id='src-file' type='file'>
+								<input id="execpy-click" type="button" class="btn btn-default btn-success input-sm margin-top-s" value="执行脚本"><br>
+								<pre id='execpy-ret' class="hidden margin-top-s"></pre>
+							</div>
+						</div>
+
+						<div class="tab-pane fade" id="genrobots">
+							<div class="margin-top-s">
+								<p><i>请选好区服，点击确认按钮进行<span class='note-red'>机器人生成</span>。</i></p>
+								<input id="genrobots-click" type="button" class="btn btn-default btn-success input-sm margin-top-s" value="生成机器人"><br>
+								<pre id='genrobots-ret' class="hidden margin-top-s"></pre>
+							</div>
+						</div>
+
+						<div class="tab-pane fade" id="cardattrs">
+							<div class="margin-top-s">
+								<p><i>请选好区服并输入角色，来进行<span class='note-red'>卡牌属性计算</span>。</i></p>
+								<div class="form-inline">
+			        				<div class="from-group">
+			        					<div class="form-group">
+										  	<label>{{ _(u"角色UID") }}</label>
+									        <input id="role-uid" type="text" class="form-control input-sm">
+										</div>
+										<div class="form-group margin-left-m">
+										  	<label></label>
+									        <input id="card-role-search" type="button" class="form-control btn btn-primary btn-circle input-sm" value='{{ _(u"查询") }}'>
+										</div>
+			        				</div>
+								</div>
+
+								<div class="row margin-top-s">
+		        					<div class="col-lg-4 col-md-4">
+		        						<div>--卡牌列表--</div><br>
+									  	<table id="cards-display" class="table table-condensed"></table>
+									</div>
+									<div class="col-lg-2 col-md-3 right-border left-border">
+										<div>--卡牌信息--</div><br>
+										<div id="card-info" class="note-red"></div>
+										<br>
+										<div>
+											<input id="card-attrs-cal" type="button" class="btn btn-success input-sm" value='{{ _(u"计算") }}'>
+										</div>
+										<br>
+										<div id="card-keys"></div>
+									</div>
+									<div class="col-lg-6 col-md-5">
+										<div>--卡牌属性--</div><br>
+										<div id="card-cal-result"></div>
+										<div>
+											<div>
+												<table id="base-table"></table>
+											</div>
+											<div>
+												<table id="character-table"></table>
+											</div>
+											<div>
+												<table id="nvalue-table"></table>
+											</div>
+											<div>
+												<table id="const-table"></table>
+											</div>
+											<div>
+												<table id="percent-table"></table>
+											</div>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+
+						<div class="tab-pane fade" id="dataexport">
+							<div class="margin-top-s">
+								<p><i>导出完成后，点击链接可进行下载。</i></p>
+								<input id="dataexport-click" type="button" class="btn btn-default btn-success input-sm" value="导出数据">
+								<div id="dataexport-show" class='margin-left-m' style='display: inline-block;'></div>
+							</div>
+						</div>
+						<div class="tab-pane fade" id="dataimport">
+							<div class="margin-top-s">
+								<p><i>上传mongo .json压缩文件，进行导入操作。</i></p>
+								<input id='dataimport-file' type='file'>
+								<input id="dataimport-click" type="button" class="btn btn-default btn-success input-sm margin-top-s" value="导入数据">
+								<div id="dataimport-show" class='margin-left-m' style='display: inline-block;'></div>
+							</div>
+						</div>
+					</div>
+	        	</div>
+	        </div>
+
+        </div>
+
+	</div>
+{% end %}
+
+{% block js %}
+	<script>
+		var CardsRoleInfo = {};
+		const cardsConfig = {
+			"keys": [
+				["unit", "基础"],
+				["star", "星数"],
+				["advance", "阶数"],
+				["nvalue", "个体值"],
+				["character", "性格"],
+				["fetters", "羁绊"],
+				["effort", "努力值"],
+				["feel", "好感度"],
+				["feel_effect", "好感度效果"],
+				["equips", "饰品"],
+				["passive_skill", "被动技能"],
+				["talent", "天赋"],
+				["trainer", "训练师等级"],
+				["trainer_attr_skill", "训练师等级属性技能"],
+				["pokedex", "图鉴"],
+				["pokedex_advance", "图鉴突破"],
+				["figure", "形象"],
+				["title", "称号"],
+				["union_skill", "公会修炼"],
+				["heldItems", "携带道具"],
+				["heldItems_effect", "携带道具效果"],
+				["explorer_component", "探险器组件"],
+				["explorer_effect", "探险器效果"],
+				["star_effect", "潜力值效果"],
+				["ability", "特性"]
+			],
+
+			"attrs": [
+				["hp", "HP"],
+				["mp1", "MP1"],
+				["mp2", "MP2"],
+				["hpRecover", "HP回复"],
+				["mp1Recover", "MP1回复"],
+				["mp2Recover", "MP2回复"],
+				["damage", "物理攻击"],
+				["specialDamage", "特殊攻击"],
+				["defence", "物理防御力"],
+				["specialDefence", "特殊防御力"],
+				["defenceIgnore", "物理防御忽视"],
+				["specialDefenceIgnore", "特殊防御忽视"],
+				["speed", "速度"],
+				["strike", "暴击"],
+				["strikeDamage", "暴击伤害"],
+				["strikeResistance", "暴击抗性"],
+				["block", "格挡等级"],
+				["breakBlock", "破格挡等级"],
+				["blockPower", "格挡强度"],
+				["dodge", "闪避"],
+				["hit", "命中"],
+				["damageAdd", "伤害加成"],
+				["damageSub", "伤害减免"],
+				["ultimateAdd", "必杀加成"],
+				["ultimateSub", "必杀抗性"],
+				["suckBlood", "吸血"],
+				["rebound", "反弹"],
+				["cure", "治疗效果"],
+				["natureRestraint", "属性克制"],
+				["damageDeepen", "伤害加深"],
+				["damageReduce", "伤害降低"]
+			],
+
+			"attrs_extend": [
+				["physicalDamageAdd", "物理攻击伤害加成"],
+				["physicalDamageSub", "物理攻击伤害减免"],
+				["specialDamageAdd", "特殊攻击伤害加成"],
+				["specialDamageSub", "特殊攻击伤害减免"],
+
+				["normalDamageAdd", "一般系伤害加成"],
+				["fireDamageAdd", "火系伤害加成"],
+				["waterDamageAdd", "水系伤害加成"],
+				["grassDamageAdd", "草系伤害加成"],
+				["electricityDamageAdd", "电系伤害加成"],
+				["iceDamageAdd", "冰系伤害加成"],
+				["combatDamageAdd", "格斗系伤害加成"],
+				["poisonDamageAdd", "毒系伤害加成"],
+				["groundDamageAdd", "地面系伤害加成"],
+				["flyDamageAdd", "飞行系伤害加成"],
+				["superDamageAdd", "超能系伤害加成"],
+				["wormDamageAdd", "虫系伤害加成"],
+				["rockDamageAdd", "岩石系伤害加成"],
+				["ghostDamageAdd", "幽灵系伤害加成"],
+				["dragonDamageAdd", "龙系伤害加成"],
+				["evilDamageAdd", "恶系伤害加成"],
+				["steelDamageAdd", "钢系伤害加成"],
+				["fairyDamageAdd", "妖精系伤害加成"],
+
+				["normalDamageSub", "一般系伤害减免"],
+				["fireDamageSub", "火系伤害减免"],
+				["waterDamageSub", "水系伤害减免"],
+				["grassDamageSub", "草系伤害减免"],
+				["electricityDamageSub", "电系伤害减免"],
+				["iceDamageSub", "冰系伤害减免"],
+				["combatDamageSub", "格斗系伤害减免"],
+				["poisonDamageSub", "毒系伤害减免"],
+				["groundDamageSub", "地面系伤害减免"],
+				["flyDamageSub", "飞行系伤害减免"],
+				["superDamageSub", "超能系伤害减免"],
+				["wormDamageSub", "虫系伤害减免"],
+				["rockDamageSub", "岩石系伤害减免"],
+				["ghostDamageSub", "幽灵系伤害减免"],
+				["dragonDamageSub", "龙系伤害减免"],
+				["evilDamageSub", "恶系伤害减免"],
+				["steelDamageSub", "钢系伤害减免"],
+				["fairyDamageSub", "妖精系伤害减免"],
+
+				["normalCure", "一般系治疗效果加成"],
+				["fireCure", "火系治疗效果加成"],
+				["waterCure", "水系治疗效果加成"],
+				["grassCure", "草系治疗效果加成"],
+				["electricityCure", "电系治疗效果加成"],
+				["iceCure", "冰系治疗效果加成"],
+				["combatCure", "格斗系治疗效果加成"],
+				["poisonCure", "毒系治疗效果加成"],
+				["groundCure", "地面系治疗效果加成"],
+				["flyCure", "飞行系治疗效果加成"],
+				["superCure", "超能系治疗效果加成"],
+				["wormCure", "虫系治疗效果加成"],
+				["rockCure", "岩石系治疗效果加成"],
+				["ghostCure", "幽灵系治疗效果加成"],
+				["dragonCure", "龙系治疗效果加成"],
+				["evilCure", "恶系治疗效果加成"],
+				["steelCure", "钢系治疗效果加成"],
+				["fairyCure", "妖精系治疗效果加成"]
+			]
+		}
+
+		$(function() {
+			$("#refreshcsv-click").on('click', function() {
+				let reqData = getReqData();
+
+				$.ajax({
+					url: '/refreshcsv',
+					type: 'post',
+					async: true,
+					contentType: 'application/json',
+					data: JSON.stringify(reqData),
+					success: function(result) {
+						$("#show-ret").removeClass('hidden');
+						$("#show-ret").text(result.ret);
+						alert("success");
+					}
+				})
+			})
+
+			$("#execpy-click").on('click', function() {
+				let file = $("#src-file").prop('files')[0];
+				console.log(file);
+
+				if ((!file) || (file.size == 0)) {
+					alert("文件为空，请选文件");
+					return;
+				}
+
+				let form = new FormData();
+	            form.append("src", file);
+	            let reqData = getReqData();
+	            if (reqData.servName)
+	            	form.append("servName", reqData.servName);
+
+				$.ajax({
+					url: '/execpy',
+					type: 'post',
+					async: true,
+					contentType: false,
+                	processData: false,
+					data: form,
+					success: function(rep) {
+						$("#execpy-ret").removeClass('hidden');
+						$("#execpy-ret").text(rep.result);
+						alert("success");
+					}
+				})
+			})
+
+			$("#genrobots-click").on('click', function() {
+				let reqData = getReqData();
+				if (!reqData.servName) {
+					alert('必须要选择一个server');
+					return;
+				}
+
+				$.ajax({
+					url: '/genrobots',
+					type: 'post',
+					async: true,
+					contentType: 'application/json',
+					data: JSON.stringify(reqData),
+					success: function(rep) {
+						$("#genrobots-ret").removeClass('hidden');
+						$("#genrobots-ret").text(rep.result);
+						alert("success");
+					}
+				})
+			})
+
+			// 卡牌属性计算
+			let html = "<div>--选中取消--</div>";
+			for (let i=0; i<cardsConfig.keys.length; i++) {
+				html += '<div><input name="card-info-checkbox" type="checkbox" value="'+ cardsConfig.keys[i][0] + '">' + cardsConfig.keys[i][1] + "</div>";
+			}
+			$("#card-keys").html(html);
+
+			$("#card-role-search").on('click', function() {
+				let reqData = getReqData()
+				if (!(reqData.servName)) {
+					alert("请选一个区服");
+					return;
+				}
+				let role_uid = $("#role-uid").val();
+				if (!(role_uid)) {
+					alert("请输入一个角色UID");
+					return;
+				}
+				reqData.role_uid = parseInt(role_uid);
+
+				$.ajax({
+					url: "/calattrs",
+					type: 'get',
+					data: reqData,
+					async: true,
+					success: function(rep) {
+						CardsRoleInfo = rep.role || {};
+						CardsRoleInfo.servName = reqData.servName;
+						$("#cards-display").bootstrapTable('destroy');
+						$("#cards-display").bootstrapTable({
+							striped: true,
+							pagination: true,
+							sidePagination: "client",
+							pageNumber: 1,
+							pageSize: 20,
+							pageList: [20, 30, 40],
+					        columns: rep["columns"],
+					        data: rep["data"],
+					        onClickRow: function(row, ele) {
+					        	console.log(row);
+					        	let html = "";
+					        	html += "<p>当前角色: " + CardsRoleInfo.servName + ", " + CardsRoleInfo.id +
+					        		", " + CardsRoleInfo.name + "</p><br>";
+					        	html += "<p>名字: " + row.name + "</p>";
+					        	html += "<p>CSV ID: " + row.card_id + "</p>";
+					        	html += "<p>DB ID: <span id='cur_card_id'>" + row.id + "</span></p>";
+					        	html += "<p>等级: " + row.level + "</p>";
+					        	html += "<p>星数: " + row.star + "</p>";
+					        	html += "<p>阶数: " + row.advance + "</p>";
+					        	html += "<p>性格: " + row.character + "</p>";
+					        	$("#card-info").html(html);
+					        },
+					        locale: userLocale
+						})
+						$("#cards-display").bootstrapTable('hideColumn', 'id');
+
+					}
+				})
+			})
+
+			$("#card-attrs-cal").on('click', function() {
+				CardsRoleInfo.cur_card_id = $("#cur_card_id").text();
+				console.log(CardsRoleInfo)
+				if (!CardsRoleInfo.servName || !CardsRoleInfo.id || !CardsRoleInfo.cur_card_id) {
+					alert("请重新查询");
+					return;
+				}
+				let disables = [];
+				$("input[name='card-info-checkbox']").each(function() {
+					if (this.checked)
+						disables.push($(this).attr('value'));
+				})
+				CardsRoleInfo.disables = disables
+
+				$.ajax({
+					url: "/calattrs",
+					type: 'post',
+					contentType: 'application/json',
+					data: JSON.stringify(CardsRoleInfo),
+					async: true,
+					success: function(rep) {
+						let html = "<pre>" + prettyJSON(JSON.stringify(rep.ret)) + "</rep>";
+						$("#card-cal-result").html(html);
+
+						// tables
+						console.log(rep.tables)
+						console.log(rep.columns)
+						let tables = {
+							'base': '#base-table',
+							'percent': '#percent-table',
+							'character': '#character-table',
+							'const': '#const-table',
+							'nvalue': '#nvalue-table'
+						}
+						for (let t in tables) {
+							// $(tables[t]).prepend(`<div>${t}</div>`)
+							$(tables[t]).bootstrapTable('destroy')
+							$(tables[t]).bootstrapTable({
+								striped: true,
+								// buttonsAlign: 'left',
+								showColumns: true,
+								pagination: true,
+								sidePagination: "client",
+								pageNumber: 1,
+								pageSize: 10,
+								pageList: [10, 20, 30, 40],
+						        columns: rep.columns[t],
+						        data: rep.tables[t],
+						        locale: userLocale
+							})
+
+							// for (let l=0; l<rep.columns[t].length; l++) {
+							// 	if (l > 6) {
+							// 		$(tables[t]).bootstrapTable('hideColumn', rep.columns[t][l]);
+							// 	}
+							// }
+						}
+
+					}
+				})
+
+			})
+
+			$('#dataexport-click').on('click', function() {
+				$(this).attr('disabled', true);
+				$('#dataexport-show').html('<strong style="color: red;">正在导出中，请稍后...</strong>');
+                $.ajax({
+                    url: '/data_export',
+                    type: 'get',
+                    async: true,
+                    success: function(rep) {
+                        if (!rep.ret) {
+                            alert('导出失败');
+                        } else {
+                            alert('导出完成');
+                            let h = `<a href='statics/${rep.data}' download='' title="下载"  mce_href="#">${rep.data}</a>`;
+                            $('#dataexport-show').html(h);
+                        }
+                    },
+                    complete: function() {
+                    	$('#dataexport-click').attr('disabled', false);
+                    }
+                })
+            })
+
+            $('#dataimport-click').on('click', function() {
+            	$(this).attr('disabled', true);
+				$('#dataimport-show').html('<strong style="color: red;">正在导入中，请稍后...</strong>');
+
+				let importFile = document.getElementById('dataimport-file').files[0];
+				if (!importFile) {
+					alert('请选择数据文件，再进行导入');
+					return;
+				}
+				let form = new FormData();
+				form.append('importFile', importFile)
+
+				$.ajax({
+                    url: '/data_export',
+                    type: 'post',
+                    async: true,
+                    contentType: false,
+                    processData: false,
+                    data: form,
+                    success: function(rep) {
+                        console.log(rep)
+                        if (rep.ret === false) {
+                        	alert(rep.msg)
+                        } else {
+                        	alert('导入成功')
+                        }
+                    },
+                    complete: function() {
+                    	$('#dataimport-click').attr('disabled', false);
+						$('#dataimport-show').html('');
+                    }
+                })
+            })
+		})
+
+		function getReqData() {
+			let reqData = {};
+			let servName = $("#serv-select").val();
+			if (servName)
+				reqData.servName = servName;
+
+			return reqData;
+		}
+
+
+	</script>
+{% end %}

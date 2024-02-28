@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
+    <title>给角色加卡牌</title>
+  </head>
+  <body>
+    <div id="body">
+      <div id="header">
+        <h1>给角色加卡牌</h1>
+      </div>
+
+请先登录游戏，再进行查询操作</br></br>
+
+
+<div id="cardlist">
+<form action="/gm/add_card_to_role" method="get">
+选择角色：</br>
+<select name="role_db_id">
+{% block body %}
+  {% for entry in entries %}
+    <option value="{{ entry[0] }}">{{ entry[1] }}</option>
+  {% end %}
+{% end %}
+</select></br></br>
+输入卡牌ID(cards.csv)：</br>
+<input type="text" name="card_id" value="0">
+<input type="submit" value="添 加">
+</form>
+</div>
+
+{{ gmRetInfo }}</br></br>
+<pre>
+{{ roleInfo }}
+</pre>
+
+    </div>
+  </body>
+</html>
